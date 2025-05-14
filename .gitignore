@@ -165,7 +165,7 @@ secret.yml
 .env
 .env.*
 secret.yaml
-*secret*.yaml
+
 *.pem
 *.key
 secret_ssh.yaml

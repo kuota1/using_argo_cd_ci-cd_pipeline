@@ -1,83 +1,110 @@
-Currency Converter - CI/CD with GitHub Actions & Argo CD
+# Currency Converter - CI/CD with GitHub Actions & Argo CD
 
 This project demonstrates a complete CI/CD pipeline for a Python-based currency conversion API using GitHub Actions, Docker, and Argo CD.
 
-Project Overview
+---
 
-A Flask API that converts currencies using RapidAPI. The application is containerized with Docker, tested and deployed using GitHub Actions, and automatically delivered to a Kubernetes cluster via Argo CD (GitOps).
+##  Project Overview
 
-Technologies Used
+A Flask API that converts currencies using [RapidAPI](https://rapidapi.com).  
+The application is containerized with Docker, tested and deployed using GitHub Actions, and automatically delivered to a Kubernetes cluster via Argo CD (GitOps).
 
-Python 3.11 / Flask 3.0
+---
 
-Docker & Docker Hub
+##  Technologies Used
 
-GitHub Actions for CI/CD
+- Python 3.11 / Flask 3.0
+- Docker & Docker Hub
+- GitHub Actions for CI/CD
+- Kubernetes (Minikube)
+- Argo CD for GitOps CD
+- Kustomize for environment overlays
 
-Kubernetes (Minikube)
+---
 
-Argo CD for GitOps CD
-
-Kustomize for environment overlays
-
- Project Structure
+##  Project Structure
 
 .
 ├── app.py
 ├── requirements.txt
 ├── Dockerfile
 ├── tests/
-│   └── test_app.py
+│ └── test_app.py
 ├── k8s/
-│   ├── base/
-│   │   └── deployment.yaml
-│   └── overlays/
-│       └── production/
-│           └── kustomization.yaml
+│ ├── base/
+│ │ └── deployment.yaml
+│ └── overlays/
+│ └── production/
+│ └── kustomization.yaml
 ├── .github/
-│   └── workflows/
-│       └── ci-cd.yaml
+│ └── workflows/
+│ └── ci-cd.yaml
 
-CI/CD Pipeline Overview
+yaml
+Copy
+Edit
 
-CI
+---
 
-Runs on every push to main or on new tags (v*.*.*)
+##  CI/CD Pipeline Overview
 
-Executes unittest to validate the application
+###  CI
+- Runs on every `push` to `main` or on new tags (`v*.*.*`)
+- Executes `unittest` to validate the application
+- Builds the Docker image
+- Pushes the image to Docker Hub with the short SHA and `latest` tags
 
-Builds the Docker image
+###  CD
+- Automatically updates the `deployment.yaml` image tag
+- Commits and pushes the change back to GitHub
+- Argo CD detects the change and deploys the new version
 
-Pushes the image to Docker Hub with the short SHA and latest tags
+---
 
-CD
+##  Secrets Management with Sealed Secrets
 
-Automatically updates the deployment.yaml image tag
+This project uses **Bitnami Sealed Secrets** to securely store Kubernetes secrets inside Git repositories.
 
-Commits and pushes the change back to GitHub
+Instead of committing raw `Secret` manifests (which can expose sensitive data), the `kubeseal` CLI encrypts the secret using the cluster's public key, producing a `sealedsecret.yaml` that is safe to version control.
 
-Argo CD detects the change and deploys the new version
+### Steps used:
 
+1. Install Sealed Secrets controller in the Kubernetes cluster.
+2. Export the cluster’s public cert:
+   ```bash
+   kubeseal --fetch-cert
+Create a Kubernetes Secret with needed values (API keys, DockerHub credentials).
 
-Results
+Run kubeseal to generate a sealed version:
 
+bash
+Copy
+Edit
+kubeseal --format=yaml --cert=cert.pem < secret.yaml > sealedsecret.yaml
+Commit only sealedsecret.yaml to Git.
+
+Argo CD automatically decrypts and applies the secret at runtime, keeping credentials safe while enabling full GitOps workflow.
+
+✅ Results
 Fully automated CI/CD process using modern DevOps practices
 
 Zero manual deployment steps
 
 GitOps compliance using Argo CD
 
-Testing
-
+ Testing
+bash
+Copy
+Edit
 python -m unittest discover -s tests
-
-Docker
-
+ Docker
+bash
+Copy
+Edit
 docker build -t rober0010/currencyconverter .
 docker push rober0010/currencyconverter:latest
-
-Contact
-
-Roberto RodriguezGitHub: @kuota1
+ Contact
+Roberto Rodriguez
+GitHub: @kuota1
 
 This project is part of my DevOps learning journey and portfolio. All secrets and credentials have been removed for security.
