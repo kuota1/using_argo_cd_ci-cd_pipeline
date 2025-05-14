@@ -1,0 +1,13 @@
+venv
+test_app.py
+README.md
+secret.yml
+.env
+
+# Secretos y variables de entorno
+.env
+.env.*
+secret.yaml
+*secret*.yaml
+*.pem
+*.key
